@@ -1,21 +1,33 @@
-import react from "react";
 import "./App.css";
-import useState from "react";
+import React, { useState } from "react";
 
 function App() {
-  // const [file, setFile] = useState(null);
+  const [file, setFile] = useState(null);
+  const [inputs, setInputs] = useState(1);
 
-  // const handleDragOver = (e) => {
-  //   e.preventDefault();
-  //   const selectedFile = e.target.files[0];
-  //   if (selectedFile) {
-  //     setFile(selectedFile.name);
-  //   }
-  // };
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    const selectedFile = e.target.files[0];
+    if (selectedFile) {
+      setFile(selectedFile.name);
+    }
+  };
 
-  // const handleClearFile = () => {
-  //   setFile(null);
-  // };
+  const handleClearFile = () => {
+    setFile(null);
+  };
+
+  const addInputs = () => {
+    setInputs(inputs + 1);
+  };
+
+  const removeInputs = () => {
+    setInputs(inputs - 1);
+  };
+
+  const handleSubmission = () => {
+    setInputs(1);
+  };
   return (
     <>
       <div className="bg-gray-800 p-5 rounded-xl">
@@ -46,7 +58,11 @@ function App() {
             type="text"
             className="bg-gray-500 border border-gray-100 text-white"
           ></input>
+          <button onClick={addInputs}> Add </button>
         </div>
+      </div>
+      <div className="flex justify-evenly">
+        <button onClick={handleSubmission}>submit</button>
       </div>
     </>
   );
