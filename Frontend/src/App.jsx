@@ -2,6 +2,7 @@ import "./App.css";
 import React, { useState } from "react";
 import Timing from "./components/Timing";
 import Header from "./components/Header";
+import UploadFile from "./components/UploadFile";
 
 function App() {
   const [file, setFile] = useState(null);
@@ -42,20 +43,11 @@ function App() {
   return (
     <>
       <Header />
-      <div className="w-full min-h-screen bg-white items-center justify-center flex">
-        <div className="w-[24%] h-auto rounded-md bg-white shadow-md border border-slate-400 p-5">
-          <label
-            htmlFor="input"
-            className="block text-slate-800 text-base font-medium mb-1.5"
-          >
-            Upload File
-          </label>
-          <div className="flex items-start w-full">
-            <input type="file" onChange={handleFileChange}></input>
-            {file && <button onClick={handleClearFile}>Clear</button>}
-          </div>
-        </div>
-      </div>
+      <UploadFile
+        file={file}
+        handleFileChange={handleFileChange}
+        handleClearFile={handleClearFile}
+      />
       <div className="bg-gray p-2 border border-red-50 flex justify-evenly bg-red-600 flex-col">
         <div>
           <p>timestamps:</p>
