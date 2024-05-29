@@ -1,12 +1,13 @@
 import "./App.css";
 import React, { useState } from "react";
+import Timing from "./components/Timing";
+import Header from "./components/Header";
 
 function App() {
   const [file, setFile] = useState(null);
-  const [inputs, setInputs] = useState(1);
+  const [inputs, setInputs] = useState([{ start: "", end: "" }]);
 
-  const handleDragOver = (e) => {
-    e.preventDefault();
+  const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
     if (selectedFile) {
       setFile(selectedFile.name);
@@ -18,21 +19,29 @@ function App() {
   };
 
   const addInputs = () => {
-    setInputs(inputs + 1);
+    setInputs([...inputs, { start: "", end: "" }]);
   };
 
-  const removeInputs = () => {
-    setInputs(inputs - 1);
+  const removeInputs = (index) => {
+    const newInputs = inputs.filter((_, i) => i !== index);
+    setInputs(newInputs);
+  };
+
+  const handleInputChange = (index, event) => {
+    const { name, value } = event.target;
+    const newInputs = inputs.map((input, i) =>
+      i === index ? { ...input, [name]: value } : input
+    );
+    setInputs(newInputs);
   };
 
   const handleSubmission = () => {
-    setInputs(1);
+    setInputs([{ start: "", end: "" }]);
   };
+
   return (
     <>
-      <div className="bg-gray-800 p-5 rounded-xl">
-        <h1 className="text-3xl font-bold text-white font-mono">LeClippers</h1>
-      </div>
+      <Header />
       <div className="w-full min-h-screen bg-white items-center justify-center flex">
         <div className="w-[24%] h-auto rounded-md bg-white shadow-md border border-slate-400 p-5">
           <label
@@ -42,27 +51,43 @@ function App() {
             Upload File
           </label>
           <div className="flex items-start w-full">
-            <input type="file"></input>
+            <input type="file" onChange={handleFileChange}></input>
+            {file && <button onClick={handleClearFile}>Clear</button>}
           </div>
         </div>
       </div>
-      <div className="bg-gray p-2 border border-red-50 flex justify-evenly">
-        <p>timestamps:</p>
+      <div className="bg-gray p-2 border border-red-50 flex justify-evenly bg-red-600 flex-col">
         <div>
-          <input
-            type="text"
-            className="bg-gray-500 border border-gray-100 text-white"
-          ></input>
-          -
-          <input
-            type="text"
-            className="bg-gray-500 border border-gray-100 text-white"
-          ></input>
-          <button onClick={addInputs}> Add </button>
+          <p>timestamps:</p>
         </div>
-      </div>
-      <div className="flex justify-evenly">
-        <button onClick={handleSubmission}>submit</button>
+        {inputs.map((input, index) => (
+          <div key={index}>
+            <input
+              type="text"
+              name="start"
+              value={input.start}
+              onChange={(e) => handleInputChange(index, e)}
+              className="bg-gray-500 border border-gray-100 text-white"
+              placeholder="time-start"
+            />
+            -
+            <input
+              type="text"
+              name="end"
+              value={input.end}
+              onChange={(e) => handleInputChange(index, e)}
+              className="bg-gray-500 border border-gray-100 text-white"
+              placeholder="time-end"
+            />
+            <button onClick={addInputs}>Add</button>
+            {inputs.length > 1 && (
+              <button onClick={() => removeInputs(index)}>Delete</button>
+            )}
+          </div>
+        ))}
+        <div className="flex justify-evenly">
+          <button onClick={handleSubmission}>Submit</button>
+        </div>
       </div>
     </>
   );
