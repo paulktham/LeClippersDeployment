@@ -1,12 +1,18 @@
 import "./App.css";
 import React, { useState } from "react";
-import Timing from "./components/Timing";
-import Header from "./components/Header";
-import UploadFile from "./components/UploadFile";
+import Download from "./pages/Download";
+import Home from "./pages/Home";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useNavigate,
+} from "react-router-dom";
 
-function App() {
+const App = () => {
   const [file, setFile] = useState(null);
   const [inputs, setInputs] = useState([{ start: "", end: "" }]);
+  const navigate = useNavigate();
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
@@ -41,48 +47,26 @@ function App() {
   };
 
   return (
-    <>
-      <Header />
-      <UploadFile
-        file={file}
-        handleFileChange={handleFileChange}
-        handleClearFile={handleClearFile}
+    <Routes>
+      <Route
+        path="/"
+        element={
+          <Home
+            file={file}
+            handleFileChange={handleFileChange}
+            handleClearFile={handleClearFile}
+            inputs={inputs}
+            handleInputChange={handleInputChange}
+            addInputs={addInputs}
+            removeInputs={removeInputs}
+            handleSubmission={handleSubmission}
+            navigate={navigate}
+          />
+        }
       />
-      <div className="bg-gray p-2 border border-red-50 flex justify-evenly bg-red-600 flex-col">
-        <div>
-          <p>timestamps:</p>
-        </div>
-        {inputs.map((input, index) => (
-          <div key={index}>
-            <input
-              type="text"
-              name="start"
-              value={input.start}
-              onChange={(e) => handleInputChange(index, e)}
-              className="bg-gray-500 border border-gray-100 text-white"
-              placeholder="time-start"
-            />
-            -
-            <input
-              type="text"
-              name="end"
-              value={input.end}
-              onChange={(e) => handleInputChange(index, e)}
-              className="bg-gray-500 border border-gray-100 text-white"
-              placeholder="time-end"
-            />
-            <button onClick={addInputs}>Add</button>
-            {inputs.length > 1 && (
-              <button onClick={() => removeInputs(index)}>Delete</button>
-            )}
-          </div>
-        ))}
-        <div className="flex justify-evenly">
-          <button onClick={handleSubmission}>Submit</button>
-        </div>
-      </div>
-    </>
+      <Route path="/download" element={<Download />} />
+    </Routes>
   );
-}
+};
 
 export default App;
