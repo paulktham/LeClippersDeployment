@@ -1,16 +1,27 @@
 import React from "react";
 
-const TimingList = ({
-  inputs,
-  handleInputChange,
-  addInputs,
-  removeInputs,
-  handleSubmission,
-  navigate,
-}) => {
+const TimingList = ({ inputs, setInputs, handleSubmission, navigate }) => {
   const onSubmit = () => {
     handleSubmission();
     navigate("/download");
+  };
+
+  const addInputs = () => {
+    setInputs([...inputs, { start: "", end: "" }]);
+  };
+
+  const removeInputs = (index) => {
+    const newInputs = inputs.filter((_, i) => i !== index);
+    setInputs(newInputs);
+  };
+
+  const handleInputChange = (index, event) => {
+    const { name, value } = event.target;
+    setInputs((prevInputs) => {
+      const newInputs = [...prevInputs];
+      newInputs[index] = { ...newInputs[index], [name]: value };
+      return newInputs;
+    });
   };
 
   return (
@@ -21,7 +32,7 @@ const TimingList = ({
       {inputs.map((input, index) => (
         <div key={index}>
           <input
-            type="text"
+            type="time"
             name="start"
             value={input.start}
             onChange={(e) => handleInputChange(index, e)}
@@ -30,7 +41,7 @@ const TimingList = ({
           />
           -
           <input
-            type="text"
+            type="time"
             name="end"
             value={input.end}
             onChange={(e) => handleInputChange(index, e)}
