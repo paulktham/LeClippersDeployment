@@ -1,14 +1,14 @@
 import React from "react";
 import Header from "../components/Header";
-import SignIn from "../components/auth/SignIn";
+import SignUp from "../components/auth/SignUp";
 
-const Login = () => {
+const Register = () => {
   return (
     <>
       <Header />
-      <SignIn />
+      <SignUp />
     </>
   );
 };
 
-export default Login;
+export default Register;
