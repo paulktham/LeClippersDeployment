@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import Download from "./pages/Download";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
+import Register from "./pages/Register";
 import {
   BrowserRouter as Router,
   Routes,
@@ -36,6 +37,7 @@ const App = () => {
       />
       <Route path="/download" element={<Download />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
     </Routes>
   );
 };
