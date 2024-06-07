@@ -2,6 +2,7 @@ import "./App.css";
 import React, { useState } from "react";
 import Download from "./pages/Download";
 import Home from "./pages/Home";
+import Login from "./pages/Login";
 import {
   BrowserRouter as Router,
   Routes,
@@ -34,6 +35,7 @@ const App = () => {
         }
       />
       <Route path="/download" element={<Download />} />
+      <Route path="/login" element={<Login />} />
     </Routes>
   );
 };
