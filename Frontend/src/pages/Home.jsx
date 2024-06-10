@@ -12,6 +12,7 @@ const Home = ({
   setInputs,
   handleSubmission,
   navigate,
+  credits,
 }) => {
   const { userLoggedIn } = useAuth(); // Use the hook to get the userLoggedIn state
 
@@ -21,7 +22,7 @@ const Home = ({
 
   return (
     <div>
-      <Header />
+      <Header credits={credits} />
       <UploadFile file={file} setFile={setFile} />
       <TimingList
         inputs={inputs}

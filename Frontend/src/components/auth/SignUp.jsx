@@ -2,23 +2,47 @@ import React, { useState } from "react";
 import { Navigate, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/authContext";
 import { doCreateUserWithEmailAndPassword } from "../../firebase/auth";
+import { db } from "../../firebase/firebase";
+import { doc, setDoc } from "firebase/firestore";
 
 const SignUp = () => {
   const navigate = useNavigate();
 
+  const [userCredits, setUserCredits] = useState(10);
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setconfirmPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [isRegistering, setIsRegistering] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
   const { userLoggedIn } = useAuth();
 
+  const createUserDocument = async (email) => {
+    try {
+      const userDocRef = doc(db, "user", email);
+      await setDoc(userDocRef, { credits: 10 });
+    } catch (err) {
+      console.error("Error creating user document:", err);
+    }
+  };
+
   const onSubmit = async (e) => {
     e.preventDefault();
+    if (password !== confirmPassword) {
+      setErrorMessage("Passwords do not match");
+      return;
+    }
     if (!isRegistering) {
       setIsRegistering(true);
-      await doCreateUserWithEmailAndPassword(email, password);
+      try {
+        await doCreateUserWithEmailAndPassword(email, password);
+        await createUserDocument(email);
+        navigate("/"); // Navigate to home or any other route after successful sign up
+      } catch (error) {
+        setErrorMessage(error.message);
+        setIsRegistering(false);
+      }
     }
   };
 
@@ -78,7 +102,7 @@ const SignUp = () => {
                 required
                 value={confirmPassword}
                 onChange={(e) => {
-                  setconfirmPassword(e.target.value);
+                  setConfirmPassword(e.target.value);
                 }}
                 className="w-full mt-2 px-3 py-2 text-gray-500 bg-transparent outline-none border focus:border-indigo-600 shadow-sm rounded-lg transition duration-300"
               />
