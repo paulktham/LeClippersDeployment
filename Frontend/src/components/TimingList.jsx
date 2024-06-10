@@ -3,7 +3,6 @@ import React from "react";
 const TimingList = ({ inputs, setInputs, handleSubmission, navigate }) => {
   const onSubmit = () => {
     handleSubmission();
-    navigate("/download");
   };
 
   const addInputs = () => {
