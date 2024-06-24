@@ -1,9 +1,9 @@
-import React from "react";
+import React, { useState, useRef } from "react";
 import Header from "../components/Header";
 import UploadFile from "../components/UploadFile";
 import TimingList from "../components/TimingList";
 import { Navigate } from "react-router-dom";
-import { useAuth } from "../context/authContext"; // Import the useAuth hook
+import { useAuth } from "../context/authContext";
 
 const Home = ({
   file,
@@ -14,7 +14,9 @@ const Home = ({
   navigate,
   credits,
 }) => {
-  const { userLoggedIn } = useAuth(); // Use the hook to get the userLoggedIn state
+  const { userLoggedIn } = useAuth();
+  const [videoDuration, setVideoDuration] = useState(0);
+  const videoRef = useRef(null);
 
   if (!userLoggedIn) {
     return <Navigate to="/login" replace={true} />;
@@ -23,12 +25,18 @@ const Home = ({
   return (
     <div>
       <Header credits={credits} />
-      <UploadFile file={file} setFile={setFile} />
+      <UploadFile
+        file={file}
+        setFile={setFile}
+        setVideoDuration={setVideoDuration}
+        videoRef={videoRef}
+      />
       <TimingList
         inputs={inputs}
         setInputs={setInputs}
         handleSubmission={handleSubmission}
         navigate={navigate}
+        videoDuration={videoDuration}
       />
     </div>
   );
