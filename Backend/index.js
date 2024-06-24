@@ -24,17 +24,19 @@ if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir);
 }
 
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, uploadsDir);
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, `${uuidv4()}.mp4`); // Rename the uploaded file with a .mp4 extension
-  },
-});
+const upload = multer({ dest: uploadsDir });
 
-const upload = multer({ storage: storage });
+// const storage = multer.diskStorage({
+//   destination: function (req, file, cb) {
+//     cb(null, uploadsDir);
+//   },
+//   filename: function (req, file, cb) {
+//     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+//     cb(null, `${uuidv4()}.mp4`); // Rename the uploaded file with a .mp4 extension
+//   },
+// });
+
+// const upload = multer({ storage: storage });
 
 app.use(cors());
 app.use(express.json());
