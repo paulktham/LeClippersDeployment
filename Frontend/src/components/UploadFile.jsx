@@ -8,6 +8,10 @@ const UploadFile = ({ file, setFile }) => {
     if (selectedFile) {
       setFile(selectedFile.name);
     }
+    const videoURL = URL.createObjectURL(file);
+    videoRef.current.src = videoURL;
+    setVideoDuration(videoRef.current.duration);
+    console.log(videoRef.current.duration);
   };
 
   const handleClearFile = () => {

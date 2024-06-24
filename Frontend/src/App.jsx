@@ -1,32 +1,24 @@
-import "./App.css";
-import React, { useEffect, useState } from "react";
-import Download from "./pages/Download";
+import React, { useState, useEffect } from "react";
+import { Routes, Route, useNavigate } from "react-router-dom";
 import Home from "./pages/Home";
+import Download from "./pages/Download";
 import Login from "./pages/Login";
-import Header from "./components/Header";
 import Register from "./pages/Register";
 import { db } from "./firebase/firebase";
 import { getDoc, doc, setDoc } from "firebase/firestore";
 import { useAuth } from "./context/authContext";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  useNavigate,
-} from "react-router-dom";
+import "./App.css";
 
 const App = () => {
   const [file, setFile] = useState(null);
   const [inputs, setInputs] = useState([{ start: "", end: "" }]);
   const navigate = useNavigate();
-
   const { userLoggedIn, currentUser } = useAuth();
   const [credits, setCredits] = useState(0);
 
   useEffect(() => {
     const fetchUserCredits = async () => {
       if (currentUser) {
-        // Ensure currentUser is available
         try {
           const userDocRef = doc(db, "user", currentUser.email);
           const userDoc = await getDoc(userDocRef);
@@ -43,19 +35,36 @@ const App = () => {
   }, [currentUser]);
 
   const handleSubmission = async () => {
-    // Subtract 3 from the current credits
-    const updatedCredits = credits - 3;
+    if (file) {
+      const { start, end } = inputs[0];
+      const formData = new FormData();
+      formData.append("video", file); // Append the video file
+      formData.append("start", start);
+      formData.append("end", end);
 
-    // Update the user's credits in Firestore
-    try {
-      const userDocRef = doc(db, "user", currentUser.email);
-      await setDoc(userDocRef, { credits: updatedCredits }, { merge: true }); // Merge is set to true to update only the credits field
-      // Update the local state with the new credits
-      setCredits(updatedCredits);
-      // Other submission logic
-      setInputs([{ start: "", end: "" }]);
-    } catch (error) {
-      console.error("Error updating user credits:", error);
+      try {
+        const response = await fetch("http://localhost:5000/process-video", {
+          method: "POST",
+          body: formData, // Send formData
+        });
+        const data = await response.json();
+        if (response.ok) {
+          const updatedCredits = credits - 3;
+          const userDocRef = doc(db, "user", currentUser.email);
+          await setDoc(
+            userDocRef,
+            { credits: updatedCredits },
+            { merge: true }
+          );
+          setCredits(updatedCredits);
+          setInputs([{ start: "", end: "" }]);
+          navigate("/download", { state: { videoUrl: data.outputPath } });
+        } else {
+          console.error("Video processing failed:", data.error);
+        }
+      } catch (error) {
+        console.error("Error processing video:", error);
+      }
     }
   };
 
