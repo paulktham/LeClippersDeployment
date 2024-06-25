@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Header from "../components/Header";
 import UploadFile from "../components/UploadFile";
 import TimingList from "../components/TimingList";
@@ -17,6 +17,20 @@ const Home = ({
   const { userLoggedIn } = useAuth();
   const [videoDuration, setVideoDuration] = useState(0);
   const videoRef = useRef(null);
+
+  useEffect(() => {
+    if (file) {
+      const video = document.createElement("video");
+      video.src = URL.createObjectURL(file);
+      video.onloadedmetadata = () => {
+        setVideoDuration(video.duration);
+      };
+      video.onerror = (error) => {
+        console.error("Error loading video: ", error);
+        setVideoDuration(null);
+      };
+    }
+  }, [file]);
 
   if (!userLoggedIn) {
     return <Navigate to="/login" replace={true} />;
