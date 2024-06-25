@@ -10,7 +10,7 @@ const port = 5000;
 
 app.use(
   cors({
-    origin: ["https://LeClippersServer.vercel.app"],
+    origin: ["https://leclippers.vercel.app"],
     methods: ["POST", "GET"],
     credentials: true,
   })
