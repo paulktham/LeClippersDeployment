@@ -7,7 +7,14 @@ const fs = require("fs");
 const multer = require("multer");
 const app = express();
 const port = 5000;
-const { v4: uuidv4 } = require("uuid");
+
+app.use(
+  cors({
+    origin: ["https://LeClippers.vercel.app"],
+    methods: ["POST", "GET"],
+    credentials: true,
+  })
+);
 
 const serviceAccount = require("./assets/leclippers1-firebase-adminsdk-7l1br-c93d999ed1.json");
 
@@ -26,7 +33,6 @@ if (!fs.existsSync(uploadsDir)) {
 
 const upload = multer({ dest: uploadsDir });
 
-app.use(cors());
 app.use(express.json());
 
 app.use("/videos", express.static(path.join(__dirname, "videos")));
