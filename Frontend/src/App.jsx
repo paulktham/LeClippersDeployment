@@ -43,10 +43,13 @@ const App = () => {
       formData.append("end", end);
 
       try {
-        const response = await fetch("http://localhost:5000/process-video", {
-          method: "POST",
-          body: formData, // Send formData
-        });
+        const response = await fetch(
+          "http://leclippersserver.vercel.app/process-video",
+          {
+            method: "POST",
+            body: formData, // Send formData
+          }
+        );
         const data = await response.json();
         if (response.ok) {
           const updatedCredits = credits - 3;
