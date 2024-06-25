@@ -1,32 +1,29 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect } from "react";
 
 const TimingList = ({ inputs, setInputs, handleSubmission, videoDuration }) => {
-  const validateTime = true;
-  // useCallback(
-  //   (time) => {
-  //     const [minutes, seconds] = time.split(":").map(Number);
-  //     const totalSeconds = minutes * 60 + seconds;
-  //     console.log(
-  //       `Validating time: ${time} -> ${totalSeconds} against duration: ${videoDuration}`
-  //     );
-  //     return totalSeconds <= videoDuration;
-  //   },
-  //   [videoDuration]
-  // );
+  const validateTime = useCallback(
+    (time) => {
+      const [minutes, seconds] = time.split(":").map(Number);
+      const totalSeconds = minutes * 60 + seconds;
+      console.log(
+        `Validating time: ${time} -> ${totalSeconds} against duration: ${videoDuration}`
+      );
+      return totalSeconds <= videoDuration;
+    },
+    [videoDuration]
+  );
 
   const onSubmit = useCallback(() => {
-    const allValid = true;
-    // inputs.every(
-    //   (input) => validateTime(input.start) && validateTime(input.end)
-    // );
+    const allValid = inputs.every(
+      (input) => validateTime(input.start) && validateTime(input.end)
+    );
     console.log("All inputs valid:", allValid);
     if (allValid) {
       handleSubmission();
     } else {
       alert("Please enter valid times within the video duration.");
     }
-  }, [inputs, handleSubmission]);
-  // , validateTime]);
+  }, [inputs, handleSubmission, validateTime]);
 
   const addInputs = useCallback(() => {
     setInputs((prevInputs) => [...prevInputs, { start: "", end: "" }]);
@@ -64,7 +61,7 @@ const TimingList = ({ inputs, setInputs, handleSubmission, videoDuration }) => {
             value={input.start}
             onChange={(e) => handleInputChange(index, e)}
             className="bg-gray-500 border border-gray-100 text-white"
-            placeholder="time-start"
+            placeholder="min:sec"
           />
           -
           <input
@@ -73,7 +70,7 @@ const TimingList = ({ inputs, setInputs, handleSubmission, videoDuration }) => {
             value={input.end}
             onChange={(e) => handleInputChange(index, e)}
             className="bg-gray-500 border border-gray-100 text-white"
-            placeholder="time-end"
+            placeholder="min:sec"
           />
           <button onClick={addInputs}>Add</button>
           {inputs.length > 1 && (
