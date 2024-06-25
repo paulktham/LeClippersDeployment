@@ -44,7 +44,7 @@ const App = () => {
 
       try {
         const response = await fetch(
-          "http://leclippersserver.vercel.app/process-video",
+          "https://leclippersserver.vercel.app/process-video",
           {
             method: "POST",
             body: formData, // Send formData
