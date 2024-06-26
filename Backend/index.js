@@ -5,8 +5,9 @@ const ffmpeg = require("fluent-ffmpeg");
 const path = require("path");
 const fs = require("fs");
 const multer = require("multer");
+
 const app = express();
-const port = 5000;
+const port = process.env.PORT || 5000;
 
 app.use(
   cors({
@@ -16,7 +17,7 @@ app.use(
   })
 );
 
-const serviceAccount = require("./assets/leclippers1-firebase-adminsdk-7l1br-c93d999ed1.json");
+const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -25,17 +26,9 @@ admin.initializeApp({
 
 const bucket = admin.storage().bucket();
 
-// Ensure the 'uploads' directory exists
-const uploadsDir = path.join(__dirname, "uploads");
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir);
-}
-
-const upload = multer({ dest: uploadsDir });
+const upload = multer({ dest: "uploads/" });
 
 app.use(express.json());
-
-app.use("/videos", express.static(path.join(__dirname, "videos")));
 
 app.get("/", (req, res) => {
   res.send("Hello from Express!");
@@ -48,21 +41,6 @@ app.post("/verifyToken", async (req, res) => {
     res.json({ uid: decodedToken.uid });
   } catch (error) {
     res.status(401).json({ error: "Unauthorized" });
-  }
-});
-
-// Ensure the 'videos' directory exists
-const videosDir = path.join(__dirname, "videos");
-if (!fs.existsSync(videosDir)) {
-  fs.mkdirSync(videosDir);
-}
-
-// Check permissions
-fs.access(videosDir, fs.constants.W_OK, (err) => {
-  if (err) {
-    console.error(`${videosDir} is not writable`);
-  } else {
-    console.log(`${videosDir} is writable`);
   }
 });
 
@@ -83,26 +61,12 @@ app.post("/process-video", upload.single("video"), async (req, res) => {
       .json({ error: "End time must be greater than start time" });
   }
 
-  const video1Path = path.normalize(req.file.path); // Normalize path
+  const video1Path = req.file.path;
   const video2Path = path.join(__dirname, "videos", "video2.mp4");
   const outputPath = path.join(__dirname, "videos", "output1.mp4");
 
-  console.log(
-    `Start: ${start}, End: ${end}, StartSeconds: ${startSeconds}, EndSeconds: ${endSeconds}, Duration: ${duration}`
-  );
-  console.log(`Video 1 Path: ${video1Path}`);
-  console.log(`Video 2 Path: ${video2Path}`);
-  console.log(`Output Path: ${outputPath}`);
-
   try {
-    // Ensure the videos directory exists
-    if (!fs.existsSync(videosDir)) {
-      fs.mkdirSync(videosDir);
-    }
-
-    // Download video2 from Firebase Storage
-    const file = bucket.file("video2.mp4"); // Replace with the correct path in your Firebase Storage
-    await file.download({ destination: video2Path });
+    await bucket.file("video2.mp4").download({ destination: video2Path });
 
     ffmpeg(video1Path)
       .inputOptions([`-ss ${startSeconds}`, `-t ${duration}`])
@@ -125,30 +89,25 @@ app.post("/process-video", upload.single("video"), async (req, res) => {
         console.log("Spawned FFmpeg with command: " + commandLine);
       })
       .on("end", async () => {
-        // Delete the uploaded file after processing is complete
         try {
           await fs.promises.unlink(video1Path);
           console.log(`Deleted uploaded file: ${video1Path}`);
         } catch (error) {
           console.error(`Error deleting uploaded file: ${video1Path}`, error);
         }
-
         res.json({
           message: "Processing complete",
-          outputPath: `videos/output1.mp4`, // Provide the full path to the output file
+          outputPath: `videos/output1.mp4`,
         });
       })
       .on("error", async (err) => {
         console.error("Error processing video:", err);
-
-        // Delete the uploaded file if an error occurs
         try {
           await fs.promises.unlink(video1Path);
           console.log(`Deleted uploaded file due to error: ${video1Path}`);
         } catch (error) {
           console.error(`Error deleting uploaded file: ${video1Path}`, error);
         }
-
         res.status(500).json({ error: "Video processing failed" });
       })
       .save(outputPath);
