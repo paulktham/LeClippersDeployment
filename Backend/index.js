@@ -18,10 +18,12 @@ app.use(
   })
 );
 
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  storageBucket: "leclippers1.appspot.com",
-});
+if (!admin.apps.length) {
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+    storageBucket: "leclippers1.appspot.com",
+  });
+}
 
 const bucket = admin.storage().bucket();
 
