@@ -5,6 +5,7 @@ const ffmpeg = require("fluent-ffmpeg");
 const path = require("path");
 const fs = require("fs");
 const multer = require("multer");
+const serviceAccount = require("./assets/leclippers1-firebase-adminsdk-7l1br-c93d999ed1.json");
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -16,9 +17,6 @@ app.use(
     credentials: true,
   })
 );
-
-const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, "\n");
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
