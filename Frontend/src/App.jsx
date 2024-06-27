@@ -48,7 +48,7 @@ const App = () => {
           {
             method: "POST",
             body: formData, // Send formData
-            credentials: "include", // Include credentials if needed
+            // credentials: "include", // Include credentials if needed
           }
         );
         const data = await response.json();
