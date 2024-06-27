@@ -48,7 +48,7 @@ const App = () => {
           {
             method: "POST",
             body: formData, // Send formData
-            credentials: "true", // Include credentials if needed
+            credentials: "include", // Include credentials if needed
             headers: {
               "Access-Control-Allow-Origin": "https://leclippers.vercel.app",
             },
