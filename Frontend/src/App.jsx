@@ -49,6 +49,7 @@ const App = () => {
             method: "POST",
             body: formData, // Send formData
             // credentials: "include", // Include credentials if needed
+            mode: "no-cors", // Set the mode to 'no-cors'
             headers: {
               "Access-Control-Allow-Origin": "https://leclippers.vercel.app",
             },
