@@ -4,7 +4,7 @@ const admin = require("firebase-admin");
 const ffmpeg = require("fluent-ffmpeg");
 const path = require("path");
 const multer = require("multer");
-const bodyParser = require("body-parser");
+const fs = require("fs");
 const { Storage } = require("@google-cloud/storage");
 const serviceAccount = require("./assets/leclippers1-firebase-adminsdk-7l1br-c93d999ed1.json");
 
@@ -20,17 +20,18 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 // Middleware for handling CORS
-app.use(
-  cors({
-    origin: "*",
-    methods: ["POST", "GET", "OPTIONS"],
-    allowedHeaders: ["Content-Type"],
-    credentials: true,
-  })
-);
+const corsOptions = {
+  origin: "https://leclippers.vercel.app", // Replace with your frontend URL
+  methods: ["POST", "GET", "OPTIONS"],
+  allowedHeaders: ["Content-Type"],
+  credentials: true,
+};
 
-app.use(express.json({ limit: "100mb" }));
-app.use(express.urlencoded({ limit: "100mb", extended: true }));
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions)); // Enable preflight requests for all routes
+
+app.use(express.json({ limit: "500mb" }));
+app.use(express.urlencoded({ limit: "500mb", extended: true }));
 
 // Initialize Google Cloud Storage
 const storage = new Storage({
@@ -54,14 +55,6 @@ app.post("/verifyToken", async (req, res) => {
   } catch (error) {
     res.status(401).json({ error: "Unauthorized" });
   }
-});
-
-app.options("/process-video", (req, res) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Content-Type");
-  res.header("Access-Control-Allow-Credentials", "true");
-  res.sendStatus(200);
 });
 
 app.post("/process-video", upload.single("video"), async (req, res) => {
