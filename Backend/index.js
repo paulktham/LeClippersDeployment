@@ -22,8 +22,9 @@ const port = process.env.PORT || 5000;
 // Middleware for handling CORS
 app.use(
   cors({
-    origin: ["hhttps://leclippers.vercel.app/"],
-    methods: ["POST", "GET"],
+    origin: "https://leclippers.vercel.app",
+    methods: ["POST", "GET", "OPTIONS"],
+    allowedHeaders: ["Content-Type"],
     credentials: true,
   })
 );
