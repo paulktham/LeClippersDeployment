@@ -27,6 +27,9 @@ app.use(
   })
 );
 
+app.use(bodyParser.json({ limit: "100mb" }));
+app.use(bodyParser.urlencoded({ limit: "100mb", extended: true }));
+
 // Middleware for parsing JSON
 app.use(express.json());
 
