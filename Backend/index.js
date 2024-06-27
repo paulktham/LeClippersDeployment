@@ -33,12 +33,12 @@ app.options("/process-video", cors());
 app.use(express.json({ limit: "1gb" }));
 app.use(express.urlencoded({ limit: "1gb", extended: true }));
 
+const bucket = admin.storage.bucket();
 // Initialize Google Cloud Storage
 const storage = new Storage({
   projectId: "leclippers1",
   keyFilename: "./assets/leclippers1-firebase-adminsdk-7l1br-c93d999ed1.json",
 });
-const bucket = storage.bucket("leclippers1.appspot.com");
 
 // Configure multer to use memory storage
 const upload = multer({ storage: multer.memoryStorage() });
@@ -79,12 +79,13 @@ app.post("/process-video", upload.single("video"), async (req, res) => {
   // Write the uploaded video to a temporary file
   await fs.promises.writeFile(video1Path, video1Buffer);
 
-  const video2Path = path.join("/tmp", "video2.mp4");
+  const video2Path = path.join(__dirname, "videos", "video2.mp4");
   const outputPath = path.join("/tmp", "output1.mp4");
 
   try {
     // Download the second video from Google Cloud Storage to a temporary path
-    await bucket.file("video2.mp4").download({ destination: video2Path });
+    const file = bucket.file("video2.mp4"); // Replace with the correct path in your Firebase Storage
+    await file.download({ destination: video2Path });
 
     // Process the video with ffmpeg
     ffmpeg(video1Path)
