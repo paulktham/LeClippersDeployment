@@ -22,7 +22,7 @@ const port = process.env.PORT || 5000;
 // Middleware for handling CORS
 app.use(
   cors({
-    origin: "https://leclippers.vercel.app",
+    origin: "*",
     methods: ["POST", "GET", "OPTIONS"],
     allowedHeaders: ["Content-Type"],
     credentials: true,
@@ -57,7 +57,7 @@ app.post("/verifyToken", async (req, res) => {
 });
 
 app.options("/process-video", (req, res) => {
-  res.header("Access-Control-Allow-Origin", "https://leclippers.vercel.app");
+  res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
   res.header("Access-Control-Allow-Headers", "Content-Type");
   res.header("Access-Control-Allow-Credentials", "true");
