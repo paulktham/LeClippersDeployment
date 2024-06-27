@@ -20,16 +20,14 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 // Middleware for handling CORS
-app.use(cors());
-app.options("*", cors());
-// app.use(
-//   cors({
-//     origin: "https://leclippers.vercel.app",
-//     methods: ["POST", "GET", "OPTIONS"],
-//     allowedHeaders: ["Content-Type"],
-//     credentials: true,
-//   })
-// );
+app.use(
+  cors({
+    origin: "https://leclippers.vercel.app",
+    methods: ["POST", "GET", "OPTIONS"],
+    allowedHeaders: ["Content-Type"],
+    credentials: true,
+  })
+);
 
 app.use(express.json({ limit: "100mb" }));
 app.use(express.urlencoded({ limit: "100mb", extended: true }));
@@ -58,13 +56,13 @@ app.post("/verifyToken", async (req, res) => {
   }
 });
 
-// app.options("/process-video", (req, res) => {
-//   res.header("Access-Control-Allow-Origin", "https://leclippers.vercel.app");
-//   res.header("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
-//   res.header("Access-Control-Allow-Headers", "Content-Type");
-//   res.header("Access-Control-Allow-Credentials", "true");
-//   res.sendStatus(200);
-// });
+app.options("/process-video", (req, res) => {
+  res.header("Access-Control-Allow-Origin", "https://leclippers.vercel.app");
+  res.header("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type");
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.sendStatus(200);
+});
 
 app.post("/process-video", upload.single("video"), async (req, res) => {
   const { start, end } = req.body;
