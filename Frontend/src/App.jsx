@@ -46,6 +46,7 @@ const App = () => {
         const response = await fetch(
           "https://leclippersserver.vercel.app/process-video",
           {
+            mode: "no-cors",
             method: "POST",
             body: formData, // Send formData
             credentials: "include", // Include credentials if needed
