@@ -30,8 +30,8 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.options("/process-video", cors());
 
-app.use(express.json({ limit: "500mb" }));
-app.use(express.urlencoded({ limit: "500mb", extended: true }));
+app.use(express.json({ limit: "1gb" }));
+app.use(express.urlencoded({ limit: "1gb", extended: true }));
 
 // Initialize Google Cloud Storage
 const storage = new Storage({
