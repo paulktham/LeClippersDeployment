@@ -60,10 +60,10 @@ app.post("/verifyToken", async (req, res) => {
 });
 
 app.options("/process-video", (req, res) => {
-  res.header("Access-Control-Allow-Origin", "https://leclippers.vercel.app");
+  res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Methods", "POST");
   res.header("Access-Control-Allow-Headers", "Content-Type");
-  res.header("Access-Control-Allow-Credentials", "include");
+  res.header("Access-Control-Allow-Credentials", "true");
   res.sendStatus(200);
 });
 
