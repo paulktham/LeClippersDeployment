@@ -4,7 +4,7 @@ const admin = require("firebase-admin");
 const ffmpeg = require("fluent-ffmpeg");
 const path = require("path");
 const multer = require("multer");
-const bodyParser = require("body-parser"); // Add this line
+const bodyParser = require("body-parser");
 const { Storage } = require("@google-cloud/storage");
 const serviceAccount = require("./assets/leclippers1-firebase-adminsdk-7l1br-c93d999ed1.json");
 
@@ -32,9 +32,6 @@ app.use(
 app.use(express.json({ limit: "100mb" }));
 app.use(express.urlencoded({ limit: "100mb", extended: true }));
 
-// Middleware for parsing JSON
-app.use(express.json());
-
 // Initialize Google Cloud Storage
 const storage = new Storage({
   projectId: "leclippers1",
@@ -60,7 +57,7 @@ app.post("/verifyToken", async (req, res) => {
 });
 
 app.options("/process-video", (req, res) => {
-  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Origin", "https://leclippers.vercel.app");
   res.header("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
   res.header("Access-Control-Allow-Headers", "Content-Type");
   res.header("Access-Control-Allow-Credentials", "true");
@@ -84,7 +81,7 @@ app.post("/process-video", upload.single("video"), async (req, res) => {
   }
 
   const video1Buffer = req.file.buffer;
-  const video1Path = path.join("/tmp", req.file.originalname); // Save to a temporary directory
+  const video1Path = path.join("/tmp", req.file.originalname);
 
   // Write the uploaded video to a temporary file
   await fs.promises.writeFile(video1Path, video1Buffer);
