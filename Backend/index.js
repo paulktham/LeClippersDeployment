@@ -4,6 +4,7 @@ const admin = require("firebase-admin");
 const ffmpeg = require("fluent-ffmpeg");
 const path = require("path");
 const multer = require("multer");
+const bodyParser = require("body-parser"); // Add this line
 const { Storage } = require("@google-cloud/storage");
 const serviceAccount = require("./assets/leclippers1-firebase-adminsdk-7l1br-c93d999ed1.json");
 
