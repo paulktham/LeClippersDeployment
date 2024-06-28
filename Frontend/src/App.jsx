@@ -4,9 +4,10 @@ import Home from "./pages/Home";
 import Download from "./pages/Download";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import { db } from "./firebase/firebase";
+import { db, storage } from "./firebase/firebase"; // Ensure you have initialized Firebase
 import { getDoc, doc, setDoc } from "firebase/firestore";
 import { useAuth } from "./context/authContext";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import "./App.css";
 
 const App = () => {
@@ -36,25 +37,29 @@ const App = () => {
 
   const handleSubmission = async () => {
     if (file) {
-      const { start, end } = inputs[0];
-      const formData = new FormData();
-      formData.append("video", file); // Append the video file
-      formData.append("start", start);
-      formData.append("end", end);
-
       try {
+        const storageRef = ref(storage, `${currentUser.uid}/${file.name}`);
+        await uploadBytes(storageRef, file);
+        const videoURL = await getDownloadURL(storageRef);
+
+        const { start, end } = inputs[0];
+        const formData = new FormData();
+        formData.append("videoURL", videoURL); // Send video URL
+        formData.append("start", start);
+        formData.append("end", end);
+
         const response = await fetch(
           "https://leclippersserver.vercel.app/process-video",
           {
-            mode: "no-cors",
             method: "POST",
-            body: formData, // Send formData
-            credentials: "include", // Include credentials if needed
+            body: formData,
+            credentials: "include",
             headers: {
               "Access-Control-Allow-Origin": "https://leclippers.vercel.app",
             },
           }
         );
+
         const data = await response.json();
         if (response.ok) {
           const updatedCredits = credits - 3;
