@@ -8,7 +8,6 @@ const fs = require("fs");
 const { Storage } = require("@google-cloud/storage");
 const serviceAccount = require("./assets/leclippers1-firebase-adminsdk-7l1br-c93d999ed1.json");
 
-// Initialize Firebase Admin SDK
 if (!admin.apps.length) {
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
@@ -19,9 +18,8 @@ if (!admin.apps.length) {
 const app = express();
 const port = process.env.PORT || 5000;
 
-// Middleware for handling CORS
 const corsOptions = {
-  origin: "https://leclippers.vercel.app", // Replace with your frontend URL
+  origin: "https://leclippers.vercel.app",
   methods: ["POST", "GET", "OPTIONS"],
   allowedHeaders: ["Content-Type"],
   credentials: true,
@@ -33,15 +31,11 @@ app.options("/process-video", cors());
 app.use(express.json({ limit: "1gb" }));
 app.use(express.urlencoded({ limit: "1gb", extended: true }));
 
-// Initialize Google Cloud Storage
 const storage = new Storage({
   projectId: "leclippers1",
   keyFilename: "./assets/leclippers1-firebase-adminsdk-7l1br-c93d999ed1.json",
 });
 const bucket = storage.bucket("leclippers1.appspot.com");
-
-// Configure multer to use memory storage
-const upload = multer({ storage: multer.memoryStorage() });
 
 app.get("/", (req, res) => {
   res.send("Hello from Express!");
@@ -57,14 +51,13 @@ app.post("/verifyToken", async (req, res) => {
   }
 });
 
-app.post("/process-video", upload.single("video"), async (req, res) => {
-  const { start, end } = req.body;
+app.post("/process-video", async (req, res) => {
+  const { videoURL, start, end } = req.body;
   const startParts = start.split(":").map(Number);
   const endParts = end.split(":").map(Number);
 
   const startSeconds = startParts[0] * 60 + (startParts[1] || 0);
   const endSeconds = endParts[0] * 60 + (endParts[1] || 0);
-
   const duration = endSeconds - startSeconds;
 
   if (duration <= 0) {
@@ -73,20 +66,18 @@ app.post("/process-video", upload.single("video"), async (req, res) => {
       .json({ error: "End time must be greater than start time" });
   }
 
-  const video1Buffer = req.file.buffer;
-  const video1Path = path.join("/tmp", req.file.originalname);
-
-  // Write the uploaded video to a temporary file
-  await fs.promises.writeFile(video1Path, video1Buffer);
-
-  const video2Path = path.join(__dirname, "videos", "video2.mp4");
-  const outputPath = path.join("/tmp", "output1.mp4");
+  const video1Path = path.join("/tmp", "input.mp4");
 
   try {
-    // Download the second video from Google Cloud Storage to a temporary path
+    const video1Response = await fetch(videoURL);
+    const video1Buffer = await video1Response.buffer();
+    await fs.promises.writeFile(video1Path, video1Buffer);
+
+    const video2Path = path.join(__dirname, "videos", "video2.mp4");
+    const outputPath = path.join("/tmp", "output1.mp4");
+
     await bucket.file("video2.mp4").download({ destination: video2Path });
 
-    // Process the video with ffmpeg
     ffmpeg(video1Path)
       .inputOptions([`-ss ${startSeconds}`, `-t ${duration}`])
       .input(video2Path)
@@ -115,10 +106,7 @@ app.post("/process-video", upload.single("video"), async (req, res) => {
           console.error(`Error deleting uploaded file: ${video1Path}`, error);
         }
 
-        // Upload the processed video back to Google Cloud Storage
-        await bucket.upload(outputPath, {
-          destination: "output1.mp4",
-        });
+        await bucket.upload(outputPath, { destination: "output1.mp4" });
 
         try {
           await fs.promises.unlink(outputPath);
@@ -144,8 +132,8 @@ app.post("/process-video", upload.single("video"), async (req, res) => {
       })
       .save(outputPath);
   } catch (error) {
-    console.error("Error downloading video from Google Cloud Storage:", error);
-    res.status(500).json({ error: "Failed to download video" });
+    console.error("Error processing video:", error);
+    res.status(500).json({ error: "Failed to process video" });
   }
 });
 
