@@ -6,6 +6,7 @@ const path = require("path");
 const multer = require("multer");
 const fs = require("fs");
 const os = require("os"); // Import the os module
+const fetch = require("node-fetch");
 const serviceAccount = require("./assets/leclippers1-firebase-adminsdk-7l1br-c93d999ed1.json");
 
 if (!admin.apps.length) {
