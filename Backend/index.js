@@ -5,6 +5,7 @@ const ffmpeg = require("fluent-ffmpeg");
 const path = require("path");
 const multer = require("multer");
 const fs = require("fs");
+const os = require("os"); // Import the os module
 const { Storage } = require("@google-cloud/storage");
 const serviceAccount = require("./assets/leclippers1-firebase-adminsdk-7l1br-c93d999ed1.json");
 
@@ -51,8 +52,10 @@ app.post("/verifyToken", async (req, res) => {
   }
 });
 
-app.post("/process-video", async (req, res) => {
-  const { videoURL, start, end } = req.body;
+const upload = multer();
+
+app.post("/process-video", upload.none(), async (req, res) => {
+  const { videoURL, start, end, uid } = req.body;
   const startParts = start.split(":").map(Number);
   const endParts = end.split(":").map(Number);
 
@@ -66,7 +69,8 @@ app.post("/process-video", async (req, res) => {
       .json({ error: "End time must be greater than start time" });
   }
 
-  const video1Path = path.join("/tmp", "input.mp4");
+  const tempDir = os.tmpdir(); // Get the OS-specific temporary directory
+  const video1Path = path.join(tempDir, "input.mp4");
 
   try {
     const video1Response = await fetch(videoURL);
@@ -74,9 +78,7 @@ app.post("/process-video", async (req, res) => {
     await fs.promises.writeFile(video1Path, video1Buffer);
 
     const video2Path = path.join(__dirname, "videos", "video2.mp4");
-    const outputPath = path.join("/tmp", "output1.mp4");
-
-    await bucket.file("video2.mp4").download({ destination: video2Path });
+    const outputPath = path.join(tempDir, "output1.mp4");
 
     ffmpeg(video1Path)
       .inputOptions([`-ss ${startSeconds}`, `-t ${duration}`])
@@ -100,40 +102,32 @@ app.post("/process-video", async (req, res) => {
       })
       .on("end", async () => {
         try {
-          await fs.promises.unlink(video1Path);
-          console.log(`Deleted uploaded file: ${video1Path}`);
+          // Upload the output file to Firebase Storage
+          const destination = `${uid}.output.mp4`;
+          await bucket.upload(outputPath, { destination });
+
+          // Clean up temporary files
+          fs.unlinkSync(video1Path);
+          fs.unlinkSync(outputPath);
+
+          res.json({
+            message: "Processing complete",
+            outputPath: destination,
+          });
         } catch (error) {
-          console.error(`Error deleting uploaded file: ${video1Path}`, error);
+          console.error("Error uploading to Firebase:", error);
+          res.status(500).json({ error: "Failed to upload video to Firebase" });
         }
-
-        await bucket.upload(outputPath, { destination: "output1.mp4" });
-
-        try {
-          await fs.promises.unlink(outputPath);
-          console.log(`Deleted output file: ${outputPath}`);
-        } catch (error) {
-          console.error(`Error deleting output file: ${outputPath}`, error);
-        }
-
-        res.json({
-          message: "Processing complete",
-          outputPath: `output1.mp4`,
-        });
       })
-      .on("error", async (err) => {
+      .on("error", (err) => {
         console.error("Error processing video:", err);
-        try {
-          await fs.promises.unlink(video1Path);
-          console.log(`Deleted uploaded file due to error: ${video1Path}`);
-        } catch (error) {
-          console.error(`Error deleting uploaded file: ${video1Path}`, error);
-        }
+        fs.unlinkSync(video1Path); // Ensure to delete the uploaded file in case of error
         res.status(500).json({ error: "Video processing failed" });
       })
       .save(outputPath);
   } catch (error) {
-    console.error("Error processing video:", error);
-    res.status(500).json({ error: "Failed to process video" });
+    console.error("Error:", error);
+    res.status(500).json({ error: "Server error" });
   }
 });
 

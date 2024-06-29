@@ -7,7 +7,12 @@ import Register from "./pages/Register";
 import { db, storage } from "./firebase/firebase"; // Ensure you have initialized Firebase
 import { getDoc, doc, setDoc } from "firebase/firestore";
 import { useAuth } from "./context/authContext";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import {
+  ref,
+  uploadBytes,
+  getDownloadURL,
+  deleteObject,
+} from "firebase/storage";
 import "./App.css";
 
 const App = () => {
@@ -47,6 +52,7 @@ const App = () => {
         formData.append("videoURL", videoURL); // Send video URL
         formData.append("start", start);
         formData.append("end", end);
+        formData.append("uid", currentUser.uid);
 
         const response = await fetch(
           "https://leclippersserver.vercel.app/process-video",
@@ -72,7 +78,13 @@ const App = () => {
           );
           setCredits(updatedCredits);
           setInputs([{ start: "", end: "" }]);
-          navigate("/download", { state: { videoUrl: data.outputPath } });
+
+          // Delete the uploaded file from Firebase Storage
+          await deleteObject(storageRef);
+
+          navigate("/download", {
+            state: { videoUrl: data.outputPath, uid: currentUser.uid },
+          });
         } else {
           console.error("Video processing failed:", data.error);
         }
