@@ -3,11 +3,10 @@ const cors = require("cors");
 const admin = require("firebase-admin");
 const ffmpeg = require("fluent-ffmpeg");
 const path = require("path");
-const fs = require("fs");
 const multer = require("multer");
+const fs = require("fs");
 const os = require("os"); // Import the os module
-const { createRequire } = require("module");
-const require = createRequire(import.meta.url);
+const serviceAccount = require("./assets/leclippers1-firebase-adminsdk-7l1br-c93d999ed1.json");
 
 if (!admin.apps.length) {
   admin.initializeApp({
@@ -51,32 +50,37 @@ app.post("/verifyToken", async (req, res) => {
 const upload = multer();
 
 app.post("/process-video", upload.none(), async (req, res) => {
-  const { videoURL, start, end, uid } = req.body;
-  const startParts = start.split(":").map(Number);
-  const endParts = end.split(":").map(Number);
-
-  const startSeconds = startParts[0] * 60 + (startParts[1] || 0);
-  const endSeconds = endParts[0] * 60 + (endParts[1] || 0);
-  const duration = endSeconds - startSeconds;
-
-  if (duration <= 0) {
-    return res
-      .status(400)
-      .json({ error: "End time must be greater than start time" });
-  }
-
-  const tempDir = os.tmpdir(); // Get the OS-specific temporary directory
-  const video1Path = path.join(tempDir, "input.mp4");
-
   try {
-    const fetch = await import("node-fetch");
-    const video1Response = await fetch.default(videoURL);
-    const video1Buffer = await video1Response.arrayBuffer();
-    await fs.promises.writeFile(video1Path, Buffer.from(video1Buffer));
+    const { videoURL, start, end, uid } = req.body;
+
+    console.log("Server side video with start:", start, "and end:", end); // Log inputs
+
+    const startParts = start.split(":").map(Number);
+    const endParts = end.split(":").map(Number);
+
+    const startSeconds = startParts[0] * 60 + (startParts[1] || 0);
+    const endSeconds = endParts[0] * 60 + (endParts[1] || 0);
+
+    const duration = endSeconds - startSeconds;
+
+    if (duration <= 0) {
+      return res
+        .status(400)
+        .json({ error: "End time must be greater than start time" });
+    }
+
+    const tempDir = os.tmpdir(); // Get the OS-specific temporary directory
+    const video1Path = path.join(tempDir, "input.mp4");
+
+    // Video 1 processing
+    const video1Response = await fetch(videoURL);
+    const video1Buffer = await video1Response.buffer();
+    await fs.promises.writeFile(video1Path, video1Buffer);
 
     const video2Path = path.join(__dirname, "videos", "video2.mp4");
     const outputPath = path.join(tempDir, "output1.mp4");
 
+    // Example ffmpeg command
     ffmpeg(video1Path)
       .inputOptions([`-ss ${startSeconds}`, `-t ${duration}`])
       .input(video2Path)
