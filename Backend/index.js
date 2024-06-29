@@ -6,7 +6,6 @@ const path = require("path");
 const multer = require("multer");
 const fs = require("fs");
 const os = require("os"); // Import the os module
-const { Storage } = require("@google-cloud/storage");
 const serviceAccount = require("./assets/leclippers1-firebase-adminsdk-7l1br-c93d999ed1.json");
 
 if (!admin.apps.length) {
@@ -32,11 +31,7 @@ app.options("/process-video", cors());
 app.use(express.json({ limit: "1gb" }));
 app.use(express.urlencoded({ limit: "1gb", extended: true }));
 
-const storage = new Storage({
-  projectId: "leclippers1",
-  keyFilename: "./assets/leclippers1-firebase-adminsdk-7l1br-c93d999ed1.json",
-});
-const bucket = storage.bucket("leclippers1.appspot.com");
+const bucket = admin.storage().bucket();
 
 app.get("/", (req, res) => {
   res.send("Hello from Express!");
@@ -74,8 +69,8 @@ app.post("/process-video", upload.none(), async (req, res) => {
 
   try {
     const video1Response = await fetch(videoURL);
-    const video1Buffer = await video1Response.buffer();
-    await fs.promises.writeFile(video1Path, video1Buffer);
+    const video1Buffer = await video1Response.arrayBuffer();
+    await fs.promises.writeFile(video1Path, Buffer.from(video1Buffer));
 
     const video2Path = path.join(__dirname, "videos", "video2.mp4");
     const outputPath = path.join(tempDir, "output1.mp4");
