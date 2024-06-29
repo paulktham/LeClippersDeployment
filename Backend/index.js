@@ -3,11 +3,11 @@ const cors = require("cors");
 const admin = require("firebase-admin");
 const ffmpeg = require("fluent-ffmpeg");
 const path = require("path");
-const multer = require("multer");
 const fs = require("fs");
+const multer = require("multer");
 const os = require("os"); // Import the os module
-const fetch = require("node-fetch");
-const serviceAccount = require("./assets/leclippers1-firebase-adminsdk-7l1br-c93d999ed1.json");
+const { createRequire } = require("module");
+const require = createRequire(import.meta.url);
 
 if (!admin.apps.length) {
   admin.initializeApp({
@@ -69,7 +69,8 @@ app.post("/process-video", upload.none(), async (req, res) => {
   const video1Path = path.join(tempDir, "input.mp4");
 
   try {
-    const video1Response = await fetch(videoURL);
+    const fetch = await import("node-fetch");
+    const video1Response = await fetch.default(videoURL);
     const video1Buffer = await video1Response.arrayBuffer();
     await fs.promises.writeFile(video1Path, Buffer.from(video1Buffer));
 
