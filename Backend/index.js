@@ -3,13 +3,14 @@ const cors = require("cors");
 const admin = require("firebase-admin");
 const ffmpegPath = require("@ffmpeg-installer/ffmpeg").path;
 const ffmpeg = require("fluent-ffmpeg");
-ffmpeg.setFfmpegPath(ffmpegPath);
 const path = require("path");
 const multer = require("multer");
 const fs = require("fs");
-const os = require("os"); // Import the os module
+const os = require("os");
 const fetch = require("node-fetch");
 const serviceAccount = require("./assets/leclippers1-firebase-adminsdk-7l1br-c93d999ed1.json");
+
+ffmpeg.setFfmpegPath(ffmpegPath);
 
 if (!admin.apps.length) {
   admin.initializeApp({
@@ -30,8 +31,9 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.options("/process-video", cors());
-app.use(express.urlencoded({ extended: true })); // Add this line to parse URL-encoded bodies
+app.options("/process-video", cors(corsOptions));
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
 app.use("/videos", express.static(path.join(__dirname, "videos")));
 const bucket = admin.storage().bucket();
@@ -56,7 +58,7 @@ app.post("/process-video", upload.none(), async (req, res) => {
   try {
     const { videoURL, start, end, uid } = req.body;
 
-    console.log("Server side video with start:", start, "and end:", end); // Log inputs
+    console.log("Server side video with start:", start, "and end:", end);
 
     const startParts = start.split(":").map(Number);
     const endParts = end.split(":").map(Number);
@@ -72,10 +74,9 @@ app.post("/process-video", upload.none(), async (req, res) => {
         .json({ error: "End time must be greater than start time" });
     }
 
-    const tempDir = os.tmpdir(); // Get the OS-specific temporary directory
+    const tempDir = os.tmpdir();
     const video1Path = path.join(tempDir, "input.mp4");
 
-    // Video 1 processing
     const video1Response = await fetch(videoURL);
     const video1Buffer = await video1Response.buffer();
     await fs.promises.writeFile(video1Path, video1Buffer);
@@ -83,7 +84,6 @@ app.post("/process-video", upload.none(), async (req, res) => {
     const video2Path = path.join(__dirname, "videos", "video2.mp4");
     const outputPath = path.join(tempDir, "output1.mp4");
 
-    // Example ffmpeg command
     ffmpeg(video1Path)
       .inputOptions([`-ss ${startSeconds}`, `-t ${duration}`])
       .input(video2Path)
@@ -106,11 +106,9 @@ app.post("/process-video", upload.none(), async (req, res) => {
       })
       .on("end", async () => {
         try {
-          // Upload the output file to Firebase Storage
           const destination = `${uid}.output.mp4`;
           await bucket.upload(outputPath, { destination });
 
-          // Clean up temporary files
           fs.unlinkSync(video1Path);
           fs.unlinkSync(outputPath);
 
@@ -125,7 +123,7 @@ app.post("/process-video", upload.none(), async (req, res) => {
       })
       .on("error", (err) => {
         console.error("Error processing video:", err);
-        fs.unlinkSync(video1Path); // Ensure to delete the uploaded file in case of error
+        fs.unlinkSync(video1Path);
         res.status(500).json({ error: "Video processing failed" });
       })
       .save(outputPath);
@@ -135,6 +133,8 @@ app.post("/process-video", upload.none(), async (req, res) => {
   }
 });
 
-const server = app.listen(port, () => {});
+const server = app.listen(port, () => {
+  console.log(`Server is running on http://localhost:${port}`);
+});
 
-server.setTimeout(600000); // Set timeout to 10 minutes
+server.setTimeout(600000);
