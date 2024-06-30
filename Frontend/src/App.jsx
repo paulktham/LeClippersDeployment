@@ -49,7 +49,7 @@ const App = () => {
 
         const { start, end } = inputs[0];
         const formData = new FormData();
-        formData.append("videoURL", videoURL); // Send video URL
+        formData.append("videoURL", videoURL);
         formData.append("start", start);
         formData.append("end", end);
         formData.append("uid", currentUser.uid);
@@ -59,32 +59,29 @@ const App = () => {
           {
             mode: "cors",
             method: "POST",
-            body: formData, // Send formData
-            credentials: "include", // Include credentials if needed
+            body: formData,
+            credentials: "include",
           }
         );
 
-        const data = await response.json();
-        if (response.ok) {
-          const updatedCredits = credits - 3;
-          const userDocRef = doc(db, "user", currentUser.email);
-          await setDoc(
-            userDocRef,
-            { credits: updatedCredits },
-            { merge: true }
-          );
-          setCredits(updatedCredits);
-          setInputs([{ start: "", end: "" }]);
-
-          // Delete the uploaded file from Firebase Storage
-          await deleteObject(storageRef);
-
-          navigate("/download", {
-            state: { videoUrl: data.outputPath, uid: currentUser.uid },
-          });
-        } else {
-          console.error("Video processing failed:", data.error);
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("Server error:", errorText);
+          return;
         }
+
+        const data = await response.json();
+        const updatedCredits = credits - 3;
+        const userDocRef = doc(db, "user", currentUser.email);
+        await setDoc(userDocRef, { credits: updatedCredits }, { merge: true });
+        setCredits(updatedCredits);
+        setInputs([{ start: "", end: "" }]);
+
+        await deleteObject(storageRef);
+
+        navigate("/download", {
+          state: { videoUrl: data.outputPath, uid: currentUser.uid },
+        });
       } catch (error) {
         console.error("Error processing video:", error);
       }
