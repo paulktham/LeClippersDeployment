@@ -31,7 +31,9 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.options("/process-video", cors());
+app.use(express.urlencoded({ extended: true })); // Add this line to parse URL-encoded bodies
 
+app.use("/videos", express.static(path.join(__dirname, "videos")));
 const bucket = admin.storage().bucket();
 
 app.get("/", (req, res) => {
