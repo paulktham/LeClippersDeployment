@@ -23,9 +23,10 @@ const port = process.env.PORT || 5000;
 
 const corsOptions = {
   origin: "https://leclippers.vercel.app",
-  // methods: ["POST", "GET", "OPTIONS"],
-  // allowedHeaders: ["Content-Type"],
   credentials: true,
+  optionsSuccessStatus: 200,
+  methods: ["GET", "POST", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
 };
 
 app.use(cors(corsOptions));
