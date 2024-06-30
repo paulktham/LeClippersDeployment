@@ -21,16 +21,13 @@ const port = process.env.PORT || 5000;
 
 const corsOptions = {
   origin: "https://leclippers.vercel.app",
-  methods: ["POST", "GET", "OPTIONS"],
-  allowedHeaders: ["Content-Type"],
+  // methods: ["POST", "GET", "OPTIONS"],
+  // allowedHeaders: ["Content-Type"],
   credentials: true,
 };
 
 app.use(cors(corsOptions));
 app.options("/process-video", cors());
-
-app.use(express.json({ limit: "1gb" }));
-app.use(express.urlencoded({ limit: "1gb", extended: true }));
 
 const bucket = admin.storage().bucket();
 
