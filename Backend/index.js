@@ -136,3 +136,5 @@ app.post("/process-video", upload.none(), async (req, res) => {
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
+
+server.setTimeout(600000); // Set timeout to 10 minutes
