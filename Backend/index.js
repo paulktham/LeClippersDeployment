@@ -1,7 +1,9 @@
 const express = require("express");
 const cors = require("cors");
 const admin = require("firebase-admin");
+const ffmpegPath = require("@ffmpeg-installer/ffmpeg").path;
 const ffmpeg = require("fluent-ffmpeg");
+ffmpeg.setFfmpegPath(ffmpegPath);
 const path = require("path");
 const multer = require("multer");
 const fs = require("fs");
