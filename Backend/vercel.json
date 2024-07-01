@@ -12,11 +12,9 @@
       "dest": "/index.js"
     }
   ],
-  "functions": [
-    {
-      "index.js": {
-        "maxDuration": 30
-      }
+  "functions": {
+    "index.js": {
+      "maxDuration": 30
     }
-  ]
+  }
 }
