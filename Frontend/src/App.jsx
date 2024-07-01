@@ -60,7 +60,7 @@ const App = () => {
             mode: "cors",
             method: "POST",
             body: formData,
-            credentials: "include",
+            credentials: "omit",
           }
         );
 

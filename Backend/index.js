@@ -42,7 +42,6 @@ const port = process.env.PORT || 5000;
 // app.use(setCorsHeaders);
 const corsOptions = {
   origin: "*",
-  credentials: true, //access-control-allow-credentials:true
   optionSuccessStatus: 200,
 };
 
