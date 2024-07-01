@@ -10,18 +10,6 @@ const os = require("os");
 const fetch = require("node-fetch");
 const serviceAccount = require("./assets/leclippers1-firebase-adminsdk-7l1br-c93d999ed1.json");
 
-function setCorsHeaders(req, res, next) {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader(
-    "Access-Control-Allow-Methods",
-    "GET, POST, PUT, PATCH, DELETE"
-  );
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  next();
-}
-
-app.use(setCorsHeaders);
-
 ffmpeg.setFfmpegPath(ffmpegPath);
 
 if (!admin.apps.length) {
@@ -34,6 +22,17 @@ if (!admin.apps.length) {
 const app = express();
 const port = process.env.PORT || 5000;
 
+function setCorsHeaders(req, res, next) {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, PATCH, DELETE"
+  );
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  next();
+}
+
+app.use(setCorsHeaders);
 // const corsOptions = {
 //   origin: "https://leclippers.vercel.app",
 //   credentials: true,
