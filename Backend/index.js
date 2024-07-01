@@ -22,34 +22,32 @@ if (!admin.apps.length) {
 const app = express();
 const port = process.env.PORT || 5000;
 
-function setCorsHeaders(req, res, next) {
-  res.setHeader("Access-Control-Allow-Origin", "https://leclippers.vercel.app");
-  res.setHeader(
-    "Access-Control-Allow-Methods",
-    "GET, POST, PUT, PATCH, DELETE, OPTIONS"
-  );
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  res.setHeader("Access-Control-Allow-Credentials", "true");
+// function setCorsHeaders(req, res, next) {
+//   res.setHeader("Access-Control-Allow-Origin", "https://leclippers.vercel.app");
+//   res.setHeader(
+//     "Access-Control-Allow-Methods",
+//     "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+//   );
+//   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+//   res.setHeader("Access-Control-Allow-Credentials", "true");
 
-  // Intercept OPTIONS method
-  if (req.method === "OPTIONS") {
-    res.sendStatus(204);
-  } else {
-    next();
-  }
-}
+//   // Intercept OPTIONS method
+//   if (req.method === "OPTIONS") {
+//     res.sendStatus(204);
+//   } else {
+//     next();
+//   }
+// }
 
-app.use(setCorsHeaders);
-// const corsOptions = {
-//   origin: "https://leclippers.vercel.app",
-//   credentials: true,
-//   optionsSuccessStatus: 200,
-//   methods: ["GET", "POST", "OPTIONS"],
-//   allowedHeaders: ["Content-Type", "Authorization"],
-// };
+// app.use(setCorsHeaders);
+const corsOptions = {
+  origin: "*",
+  credentials: true, //access-control-allow-credentials:true
+  optionSuccessStatus: 200,
+};
 
-// app.use(cors(corsOptions));
-// app.options("/process-video", cors(corsOptions));
+app.use(cors(corsOptions)); // Use this after the variable declaration
+
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
