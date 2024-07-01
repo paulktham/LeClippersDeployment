@@ -23,13 +23,20 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 function setCorsHeaders(req, res, next) {
-  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Origin", "https://leclippers.vercel.app");
   res.setHeader(
     "Access-Control-Allow-Methods",
-    "GET, POST, PUT, PATCH, DELETE"
+    "GET, POST, PUT, PATCH, DELETE, OPTIONS"
   );
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  next();
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+
+  // Intercept OPTIONS method
+  if (req.method === "OPTIONS") {
+    res.sendStatus(204);
+  } else {
+    next();
+  }
 }
 
 app.use(setCorsHeaders);
