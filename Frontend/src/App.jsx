@@ -55,7 +55,7 @@ const App = () => {
         formData.append("uid", currentUser.uid);
 
         const response = await fetch(
-          "https://leclippersserver2.vercel.app/process-video",
+          "https://leclippers-backend.vercel.app/process-video",
           {
             mode: "cors",
             method: "POST",
